@@ -1,1 +1,833 @@
  
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  DHCP0:
+    Type: 'AWS::EC2::DHCPOptions'
+    Properties:
+      DomainName: vpc0.app02.local
+      DomainNameServers:
+        - AmazonProvidedDNS
+      Tags:
+        - Key: Name
+          Value: DHCP.0
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  DHCPVPC0:
+    Type: 'AWS::EC2::VPCDHCPOptionsAssociation'
+    Properties:
+      DhcpOptionsId: !Ref DHCP0
+      VpcId: !Ref VPC0
+    DependsOn: []
+    
+  IGWUX01:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: IGW.UX.01
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  IGWUXVPC0:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref VPC0
+      InternetGatewayId: !Ref IGWUX01
+    
+  VPC0:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: VPC.0
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  SNUX0:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC0
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: SN.UX.0
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    DependsOn: []
+    
+  SNUX1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC0
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select 
+        - 1
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: SN.UX.1
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  SNBS0:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC0
+      MapPublicIpOnLaunch: false
+      CidrBlock: 10.0.100.0/24
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: SN.BS.0
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  SNBS1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC0
+      MapPublicIpOnLaunch: false
+      CidrBlock: 10.0.101.0/24
+      AvailabilityZone: !Select 
+        - 1
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: SN.BS.1
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  SNCR0:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC0
+      MapPublicIpOnLaunch: false
+      CidrBlock: 10.0.200.0/24
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: SN.CR.0
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  SNCR1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC0
+      MapPublicIpOnLaunch: false
+      CidrBlock: 10.0.201.0/24
+      AvailabilityZone: !Select 
+        - 1
+        - !GetAZs ''
+      Tags:
+        - Key: Name
+          Value: SN.CR.1
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  RTUX:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: RT.UX
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  RTBS:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: RT.BS
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  RTCR:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: RT.CR
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  RTUXSNUX0:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RTUX
+      SubnetId: !Ref SNUX0
+    
+  RTUXSNUX1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RTUX
+      SubnetId: !Ref SNUX1
+    
+  RTBSSNBS0:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RTBS
+      SubnetId: !Ref SNBS0
+    
+  RTBSSNBS1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RTBS
+      SubnetId: !Ref SNBS1
+    
+  RTCRSNCR0:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RTCR
+      SubnetId: !Ref SNCR0
+    
+  RTCRSNCR1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref RTCR
+      SubnetId: !Ref SNCR1
+    
+  RUXIGWUX01:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RTUX
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGWUX01
+    
+  NACLUX:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: NACL.UX
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  NACLBS:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: NACL.BS
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  NACLCR:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: NACL.CR
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+  NACLUXSNUX0:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      SubnetId: !Ref SNUX0
+    
+  NACLUXSNUX1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      SubnetId: !Ref SNUX1
+    
+  NACLBSSNBS0:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref NACLBS
+      SubnetId: !Ref SNBS0
+    
+  NACLBSSNBS1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref NACLBS
+      SubnetId: !Ref SNBS1
+    
+  NACLCRSNCR0:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref NACLCR
+      SubnetId: !Ref SNCR0
+    
+  NACLCRSNCR1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref NACLCR
+      SubnetId: !Ref SNCR1
+    
+  NACLEUXI100:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 10.0.0.0/16
+      Egress: false
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: 100
+    
+  NACLEUXI200:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      PortRange:
+        From: 22
+        To: 22
+      Protocol: '6'
+      RuleAction: allow
+      RuleNumber: 200
+    
+  NACLEUXI300:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: '6'
+      RuleAction: allow
+      RuleNumber: 300
+    
+  NACLEUXI400:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 0.0.0.0/0
+      Egress: false
+      PortRange:
+        From: 8080
+        To: 8080
+      Protocol: '6'
+      RuleAction: allow
+      RuleNumber: 400
+  NACLEUXE100:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      PortRange:
+        From: 32768
+        To: 65535
+      Protocol: '6'
+      RuleAction: allow
+      RuleNumber: 100
+    
+  NACLEUXE200:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 10.0.0.0/16
+      Egress: true
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: 200
+    
+  NACLEUXE300:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      PortRange:
+        From: 80
+        To: 80
+      Protocol: '6'
+      RuleAction: allow
+      RuleNumber: 300
+    
+  NACLEUXE301:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLUX
+      CidrBlock: 0.0.0.0/0
+      Egress: true
+      PortRange:
+        From: 443
+        To: 443
+      Protocol: '6'
+      RuleAction: allow
+      RuleNumber: 301
+    
+  NACLEBSI100:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLBS
+      CidrBlock: 10.0.0.0/16
+      Egress: false
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: 100
+    
+  NACLEBSE100:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLBS
+      CidrBlock: 10.0.0.0/16
+      Egress: true
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: 100
+    
+  NACLECRI100:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLCR
+      CidrBlock: 10.0.0.0/16
+      Egress: false
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: 100
+    
+  NACLECRE100:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId: !Ref NACLCR
+      CidrBlock: 10.0.0.0/16
+      Egress: true
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: 100
+    
+        
+  SGUXINTERNET:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: SG.UX.INTERNET
+      GroupDescription: >-
+        Security Group to UX, It contains rules to Internet Connections
+        (Inbound/outbound)
+      VpcId: !Ref VPC0
+      SecurityGroupIngress:
+        - FromPort: 8080
+          ToPort: 8080
+          IpProtocol: tcp
+          Description: HTTP Aux Connections from Internet.
+          CidrIp: 0.0.0.0/0
+        - FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+          Description: HTTP Connections from Internet.
+          CidrIp: 0.0.0.0/0
+        - FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          Description: SSH Connections from Internet.
+      SecurityGroupEgress:
+        - FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          Description: HTTP Connection to Internet.
+        - FromPort: 443
+          ToPort: 443
+          IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS Connection to Internet.
+      Tags:
+        - Key: Name
+          Value: SG.UX.INTERNET
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+        
+  SGIUXPRIVATE001:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGUXPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      SourceSecurityGroupId: !Ref SGUXPRIVATE
+      Description: ICMP Connection from UX private.
+      
+  SGEUXPRIVATE001:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGUXPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      DestinationSecurityGroupId: !Ref SGUXPRIVATE
+      Description: ICMP Connection to UX private.
+  SGEUXPRIVATE002:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGUXPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      DestinationSecurityGroupId: !Ref SGBSPRIVATE
+      Description: ICMP Connection to BS private.
+  SGEUXPRIVATE003:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGUXPRIVATE
+      FromPort: 8080
+      ToPort: 8080
+      IpProtocol: tcp
+      DestinationSecurityGroupId: !Ref SGBSPRIVATE
+      Description: HTTP Aux Connection to BS private.
+  SGEUXPRIVATE004:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGUXPRIVATE
+      FromPort: 80
+      ToPort: 80
+      IpProtocol: tcp
+      DestinationSecurityGroupId: !Ref SGBSPRIVATE
+      Description: HTTP Connection to BS private.
+  SGEUXPRIVATE005:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGUXPRIVATE
+      FromPort: 22
+      ToPort: 22
+      IpProtocol: tcp
+      DestinationSecurityGroupId: !Ref SGBSPRIVATE
+      Description: SSH Connection to BS private.
+      
+  SGUXPRIVATE:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: SG.UX.PRIVATE
+      GroupDescription: >-
+        Security Group to Api UX, It contains rules to private Connections
+        (Inbound/outbound)
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: SG.UX.PRIVATE
+        - Key: Environment
+          Value: !Ref EnvironmentType
+    
+        
+  SGIBSPRIVATE001:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      SourceSecurityGroupId: !Ref SGUXPRIVATE
+      Description: ICMP Connection from UX private.
+  SGIBSPRIVATE002:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      SourceSecurityGroupId: !Ref SGBSPRIVATE
+      Description: ICMP Connection from BS private.
+  SGIBSPRIVATE003:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 80
+      ToPort: 80
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGUXPRIVATE
+      Description: HTTP Connection from UX private.
+  SGIBSPRIVATE004:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 80
+      ToPort: 80
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: HTTP Connection from BS private.
+  SGIBSPRIVATE005:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 8080
+      ToPort: 8080
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGUXPRIVATE
+      Description: HTTP Aux Connection from UX private.
+  SGIBSPRIVATE006:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 8080
+      ToPort: 8080
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: HTTP Aux Connection from BS private.
+  SGIBSPRIVATE007:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 22
+      ToPort: 22
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGUXPRIVATE
+      Description: SSH Connection from UX private.
+ 
+  SGEBSPRIVATE001:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      DestinationSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: ICMP Connection to BS private.
+  SGEBSPRIVATE002:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      DestinationSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: ICMP Connection to CR private.
+  SGEBSPRIVATE003:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 80
+      ToPort: 80
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: HTTP Connection to BS private.
+  SGEBSPRIVATE004:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 80
+      ToPort: 80
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: HTTP Connection to CR private.
+  SGEBSPRIVATE005:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 8080
+      ToPort: 8080
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: HTTP Aux Connection to BS private.
+  SGEBSPRIVATE006:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 8080
+      ToPort: 8080
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: HTTP Aux Connection to CR private.
+  SGEBSPRIVATE007:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGBSPRIVATE
+      FromPort: 22
+      ToPort: 22
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: SSH Connection to CR private.
+     
+  SGBSPRIVATE:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: SG.BS.PRIVATE
+      GroupDescription: >-
+        Security Group to Api BS, It contains rules to private Connections
+        (Inbound/outbound)
+      VpcId: !Ref VPC0
+      Tags:
+        - Key: Name
+          Value: SG.BS.PRIVATE
+        - Key: Environment
+          Value: !Ref EnvironmentType
+          
+  SGICRPRIVATE001:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      SourceSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: ICMP Connection from BS private.
+  SGICRPRIVATE002:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE                
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      SourceSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: ICMP Connection from CR private.
+  SGICRPRIVATE003:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE
+      FromPort: 80
+      ToPort: 80
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: HTTP Connection from BS private.
+  SGICRPRIVATE004:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE
+      FromPort: 8080
+      ToPort: 8080
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: HTTP Aux Connection from BS private.
+  SGICRPRIVATE005:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE
+      FromPort: 22
+      ToPort: 22
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGBSPRIVATE
+      Description: SSH Connection from BS private.
+      
+  SGECRPRIVATE001:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE    
+      FromPort: -1
+      ToPort: -1
+      IpProtocol: icmp
+      DestinationSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: ICMP Connection to CR private.
+  SGECRPRIVATE002:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref SGCRPRIVATE  
+      FromPort: 3306
+      ToPort: 3306
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Ref: SGRDSMYSQL
+      Description: RDS Connection to rds-mysql01-yr.
+      
+  SGCRPRIVATE:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: SG.CR.PRIVATE
+      GroupDescription: Security Group to Api CR, It contains rules to private Connections
+        (Inbound/outbound)
+      VpcId:
+        Ref: VPC0
+      Tags:
+        - Key: Name
+          Value: SG.CR.PRIVATE
+        - Key: Environment
+          Value: !Ref EnvironmentType        
+
+  SGIRDSMYSQL01:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref SGRDSMYSQL
+      FromPort: 3306
+      ToPort: 3306
+      IpProtocol: tcp
+      SourceSecurityGroupId:
+        Ref: SGCRPRIVATE
+      Description: RDS Connection from CR private to rds-mysql01-yr.
+  
+  SGRDSMYSQL:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: SG.RDS.MYSQL
+      GroupDescription: Security Group to RDS
+      VpcId:
+        Ref: VPC0
+      SecurityGroupEgress:
+      - FromPort: -1
+        ToPort: -1
+        IpProtocol: "-1"
+        CidrIp: 0.0.0.0/0
+        Description: All traffic
+      Tags:
+        - Key: Name
+          Value: SG.RDS.MYSQL
+        - Key: Environment
+          Value: !Ref EnvironmentType        
+      
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t1.micro
+    AllowedValues:
+      - t2.nano
+      - t1.micro
+      - t2.micro
+    Description: 'Enter t2.nano, t1.micro, or t2.micro. Default is t2.nano.'
+  EnvironmentType:
+    Description: Environment type.
+    Default: DEV
+    Type: String
+    AllowedValues:
+      - PROD
+      - DEV
+      - TEST
+    ConstraintDescription: 'must specify PROD, DEV, or TEST.'
+Conditions:
+  ProdResources: !Equals 
+    - !Ref EnvironmentType
+    - PROD
+  DevResources: !Equals 
+    - !Ref EnvironmentType
+    - DEV
+  TestResources: !Equals 
+    - !Ref EnvironmentType
+    - TEST
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-0c225aeb42bf9276e
